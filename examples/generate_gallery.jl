@@ -1,18 +1,27 @@
 """
 Generate the full gallery of PlasmaWaves.jl static diagnostic figures (.png)
-and animated wave propagation demos (.gif).
+and animated wave propagation demos (.mp4 by default; also supports .webm or .gif).
 
 Usage:
-    julia --project=. examples/generate_gallery.jl [output_dir]
+    julia --project=examples examples/generate_gallery.jl [output_dir] [format]
+
+Examples:
+    julia --project=examples examples/generate_gallery.jl gallery mp4
+    julia --project=examples examples/generate_gallery.jl gallery gif
 """
 
 using CairoMakie
 using PlasmaWaves
 
-function generate_gallery(outdir::AbstractString = joinpath(@__DIR__, "..", "gallery");
-                          nframes::Int = 72, fps::Int = 24)
+function generate_gallery(
+    outdir::AbstractString = joinpath(@__DIR__, "..", "gallery");
+    format::AbstractString = "mp4",
+    nframes::Int = 72,
+    fps::Int = 24,
+)
+    ext = lstrip(lowercase(String(format)), '.')
     mkpath(outdir)
-    @info "Generating PlasmaWaves.jl gallery into $outdir ..."
+    @info "Generating PlasmaWaves.jl gallery (.$ext animations) into $outdir ..."
 
     # Static diagnostic figures
     static_figs = [
@@ -33,31 +42,33 @@ function generate_gallery(outdir::AbstractString = joinpath(@__DIR__, "..", "gal
         save(p, fig; px_per_unit = 2)
     end
 
-    # Animated wave propagation GIFs
+    # Animated wave propagation demos
     animations = [
-        ("alfven_wave.gif", animate_alfven_wave),
-        ("magnetosonic_waves.gif", animate_magnetosonic_waves),
-        ("whistler_emic.gif", animate_whistler_emic),
-        ("whistler_packet.gif", animate_whistler_packet),
-        ("faraday_rotation.gif", animate_faraday_rotation),
-        ("kaw_vs_saw.gif", animate_kaw_vs_saw),
-        ("hybrid_waves.gif", animate_hybrid_waves),
-        ("landau_damping.gif", animate_landau_damping),
-        ("ion_acoustic.gif", animate_ion_acoustic),
-        ("bernstein_wave.gif", animate_bernstein_wave),
-        ("phase_mixing.gif", animate_phase_mixing),
+        ("alfven_wave", animate_alfven_wave),
+        ("magnetosonic_waves", animate_magnetosonic_waves),
+        ("whistler_emic", animate_whistler_emic),
+        ("whistler_packet", animate_whistler_packet),
+        ("faraday_rotation", animate_faraday_rotation),
+        ("kaw_vs_saw", animate_kaw_vs_saw),
+        ("hybrid_waves", animate_hybrid_waves),
+        ("landau_damping", animate_landau_damping),
+        ("ion_acoustic", animate_ion_acoustic),
+        ("bernstein_wave", animate_bernstein_wave),
+        ("phase_mixing", animate_phase_mixing),
     ]
-    for (fname, fn) in animations
+    for (stem, fn) in animations
+        fname = "$stem.$ext"
         p = joinpath(outdir, fname)
         @info "  Animating $fname ($nframes frames @ $fps fps) ..."
         fn(p; nframes, fps)
     end
 
-    @info "Done! All figures and GIFs saved to $outdir."
+    @info "Done! All figures and animations saved to $outdir."
     return outdir
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
     outdir = length(ARGS) >= 1 ? ARGS[1] : joinpath(@__DIR__, "..", "gallery")
-    generate_gallery(outdir)
+    fmt = length(ARGS) >= 2 ? ARGS[2] : "mp4"
+    generate_gallery(outdir; format = fmt)
 end
