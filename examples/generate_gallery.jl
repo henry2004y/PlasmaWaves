@@ -33,6 +33,7 @@ function generate_gallery(
         ("bernstein_dispersion.png", plot_bernstein_dispersion),
         ("transport_ratios.png", plot_transport_ratios),
         ("confirm_alfven.png", () -> plot_confirmation(confirm_alfven())),
+        ("confirm_whistler.png", () -> plot_confirmation(confirm_whistler())),
         ("confirm_langmuir.png", () -> plot_confirmation(confirm_langmuir())),
     ]
     for (fname, fn) in static_figs

@@ -189,6 +189,19 @@ function hall_mhd_dispersion(plasma::PlasmaParams, k_par::Real; branch::Symbol =
     end
 end
 
+function _whistler_n2(plasma::PlasmaParams, ω::Real, θ::Real)
+    if abs(θ) < 1e-12
+        return real(stix_parameters(plasma, ω).R)
+    end
+    n2p, n2m = cold_plasma_n2(plasma, ω, θ)
+    if n2p > 0 && n2m > 0
+        # Below Ω_i both branches propagate; the smaller n² is the fast/whistler (R) mode
+        return min(n2p, n2m)
+    else
+        return max(n2p, n2m)
+    end
+end
+
 """
     whistler_wave(plasma::PlasmaParams, k::Real, θ::Real=0.0; model::Symbol=:hall, amp::Real=0.15)
 
@@ -225,17 +238,12 @@ function whistler_wave(
     end
 
     # Solve full cold plasma R-whistler branch for given (k, θ) via bisection on n²(ω) - (ck/ω)² = 0
-    f_res(ω) = begin
-        n2p, n2m = cold_plasma_n2(plasma, ω, θ)
-        # Whistler is the larger positive n² root below Ωe cos(θ)
-        n2_w = max(n2p, n2m)
-        return n2_w - (plasma.c * k / ω)^2
-    end
+    f_res(ω) = _whistler_n2(plasma, ω, θ) - (plasma.c * k / ω)^2
     ω_lo = 1e-4 * abs(cyclotron_frequency(get_ion(plasma), plasma))
     ω_hi = ω_max
     ω = _bisect(f_res, ω_lo, ω_hi)
-    n2p, n2m = cold_plasma_n2(plasma, ω, θ)
-    return cold_plasma_eigenmode(plasma, ω, θ, max(n2p, n2m); mode = :whistler, amp)
+    n2 = _whistler_n2(plasma, ω, θ)
+    return cold_plasma_eigenmode(plasma, ω, θ, n2; mode = :whistler, amp)
 end
 
 """

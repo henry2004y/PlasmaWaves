@@ -1,10 +1,12 @@
 module PlasmaWavesBonitoExt
 
 using Bonito
-using Bonito: App, DOM, Routes, Slider, Styles, export_static, Server
+using Bonito: App, DOM, Routes, Slider, Styles, export_static, Server, record_states
 using WGLMakie
-using WGLMakie: Figure, Axis, Axis3, Observable, @lift, Point3f, lines!, linesegments!, scatter!, hlines!, axislegend, DataAspect
+using WGLMakie: Figure, Axis, Observable, @lift, @L_str, to_colormap, lines!, axislegend, DataAspect
 using PlasmaWaves
+
+const SET2 = to_colormap(:Set2_8)
 
 const NAV_STYLE = Styles(
     "display" => "flex",
@@ -25,7 +27,7 @@ const LINK_STYLE = Styles(
 )
 
 const PAGE_STYLE = Styles(
-    "max-width" => "1080px",
+    "max-width" => "1140px",
     "margin" => "1.5rem auto",
     "padding" => "0 1.25rem 3rem 1.25rem",
     "font-family" => "system-ui, -apple-system, sans-serif",
@@ -104,7 +106,7 @@ function _home_app(base::AbstractString)
             DOM.div(
                 DOM.h2("Wave Families"),
                 DOM.ul(
-                    DOM.li(DOM.a("MHD & Alfvén Waves"; href = _route_href(base, "/mhd/")), " — Shear Alfvén, Fast & Slow Magnetosonic, Friedrich diagrams, Phase Mixing."),
+                    DOM.li(DOM.a("MHD & Alfvén Waves"; href = _route_href(base, "/mhd/")), " — Shear Alfvén, Fast & Slow Magnetosonic, interactive Friedrich diagram, Phase Mixing."),
                     DOM.li(DOM.a("Cold Plasma & Whistlers"; href = _route_href(base, "/cold/")), " — Stix CPDR, Whistler vs. EMIC circular polarization, CMA diagram, Faraday rotation."),
                     DOM.li(DOM.a("Kinetic & Inertial Alfvén Waves"; href = _route_href(base, "/kaw/")), " — Finite Larmor radius / electron inertia dispersion, parallel E_∥, and electron trapping."),
                     DOM.li(DOM.a("Kinetic, Landau & Bernstein Waves"; href = _route_href(base, "/kinetic/")), " — Vlasov plasma dispersion Z(ζ), Langmuir & Ion-Acoustic Landau damping, EBW/IBW harmonics."),
@@ -118,33 +120,47 @@ end
 
 function _mhd_app(base::AbstractString; gallery_url::Union{Nothing,String} = nothing, media_ext::String = "mp4")
     return App() do session
-        s_vs = Slider(0.2:0.05:2.0; value = 0.6)
-        θs = range(0, 2π, length = 241)
+        # Discrete steps so Bonito.record_states embeds offline static interactivity for GitHub Pages
+        s_vs = Slider(0.2:0.15:2.0; value = 0.65)
+        θs = range(0, 2π, length = 181)
 
-        fig = Figure(size = (560, 440))
-        ax = Axis(fig[1, 1]; title = "Interactive MHD Friedrich Phase-Velocity Diagram", xlabel = "v_x / vₐ", ylabel = "v_z / vₐ", aspect = DataAspect())
+        fig = Figure(size = (640, 480), fontsize = 18)
+        ax = Axis(
+            fig[1, 1];
+            title = L"\text{MHD Friedrich Phase-Velocity Diagram}",
+            titlesize = 19,
+            xlabel = L"v_x / v_A",
+            ylabel = L"v_z / v_A",
+            aspect = DataAspect(),
+            limits = (-2.2, 2.2, -2.2, 2.2),
+        )
         vf_x = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_fast * sin(θ) for θ in θs])
         vf_z = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_fast * cos(θ) for θ in θs])
-        va_x = [friedrich_phase_speeds(1.0, 0.6, θ).v_alfven * sin(θ) for θ in θs]
-        va_z = [friedrich_phase_speeds(1.0, 0.6, θ).v_alfven * cos(θ) for θ in θs]
+        va_x = [friedrich_phase_speeds(1.0, 0.65, θ).v_alfven * sin(θ) for θ in θs]
+        va_z = [friedrich_phase_speeds(1.0, 0.65, θ).v_alfven * cos(θ) for θ in θs]
         vs_x = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_slow * sin(θ) for θ in θs])
         vs_z = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_slow * cos(θ) for θ in θs])
 
-        lines!(ax, vf_x, vf_z; color = :crimson, linewidth = 2.5, label = "Fast")
-        lines!(ax, va_x, va_z; color = :dodgerblue, linewidth = 2.5, linestyle = :dash, label = "Alfvén")
-        lines!(ax, vs_x, vs_z; color = :forestgreen, linewidth = 2.5, label = "Slow")
-        axislegend(ax; position = :rb, framevisible = false)
+        lines!(ax, vf_x, vf_z; color = SET2[2], linewidth = 3.0, label = L"\text{Fast}")
+        lines!(ax, va_x, va_z; color = SET2[3], linewidth = 3.0, linestyle = :dash, label = L"\text{Alfvén}")
+        lines!(ax, vs_x, vs_z; color = SET2[1], linewidth = 3.0, label = L"\text{Slow}")
+        axislegend(ax; position = :rb, framevisible = false, labelsize = 15)
 
-        fig3d = animate_alfven_wave(nothing).fig
-
-        cards = Any[
+        friedrich_card = record_states(
+            session,
             DOM.div(
-                DOM.h2("Friedrich Diagram Explorer"),
-                DOM.p("Adjust vₛ / vₐ (live server mode) to transition between low-β and high-β regimes:"),
+                DOM.h2("Friedrich Diagram Explorer (Works Offline in Static HTML)"),
+                DOM.p("Drag the vₛ / vₐ slider to transition between low-β (vₛ < vₐ) and high-β (vₛ > vₐ) regimes:"),
                 DOM.div("vₛ / vₐ = ", s_vs),
                 fig;
                 style = CARD_STYLE,
             ),
+        )
+
+        fig3d = animate_alfven_wave(nothing).fig
+
+        cards = Any[
+            friedrich_card,
             DOM.div(
                 DOM.h2("Interactive 3D Shear Alfvén Wave (Drag to Rotate)"),
                 fig3d;
@@ -213,15 +229,19 @@ end
 
 function _confirm_app(base::AbstractString)
     return App() do session
-        fig_alf = plot_confirmation(confirm_alfven())
+        fig_alf  = plot_confirmation(confirm_alfven())
+        fig_whis = plot_confirmation(confirm_whistler())
+        fig_kaw  = plot_confirmation(confirm_kaw())
         fig_lang = plot_confirmation(confirm_langmuir())
         return _page(
             base,
             "Theory vs. Kinetic Confirmation (PlasmaBO.jl)",
             DOM.p(
-                "Compare analytical textbook dispersion relations directly against full hot magnetized kinetic solutions from PlasmaBO.jl (BOHH), revealing where fluid/asymptotic models hold and where Hall dispersion, cyclotron damping, or Landau damping take over.",
+                "Compare analytical textbook dispersion relations directly against tracked hot magnetized kinetic branches from PlasmaBO.jl (BOHH), revealing where fluid/asymptotic models hold and where Hall dispersion, cyclotron damping, or Landau damping take over.",
             ),
-            DOM.div(DOM.h2("Ideal MHD Alfvén vs. PlasmaBO (Hall Splitting at k dᵢ ∼ 1)"), fig_alf; style = CARD_STYLE),
+            DOM.div(DOM.h2("Ideal MHD Alfvén vs. PlasmaBO (EMIC & Whistler Hall Splitting)"), fig_alf; style = CARD_STYLE),
+            DOM.div(DOM.h2("Cold Whistler vs. PlasmaBO"), fig_whis; style = CARD_STYLE),
+            DOM.div(DOM.h2("Bessel KAW vs. PlasmaBO"), fig_kaw; style = CARD_STYLE),
             DOM.div(DOM.h2("Bohm-Gross Langmuir vs. PlasmaBO (Landau Damping Onset)"), fig_lang; style = CARD_STYLE),
         )
     end
@@ -231,9 +251,6 @@ end
     plasma_waves_routes(; gallery_prefix=nothing, base_url="", media_ext="mp4")
 
 Build the multi-page `Bonito.Routes` web application for `PlasmaWaves.jl`.
-- `base_url`: subpath prefix for GitHub Pages project sites (e.g. `"/PlasmaWaves"`).
-- `gallery_prefix`: folder name of pre-rendered animations (e.g. `"gallery"`).
-- `media_ext`: animation file extension (`"mp4"`, `"webm"`, or `"gif"`).
 """
 function PlasmaWaves.plasma_waves_routes(;
     gallery_prefix::Union{Nothing,String} = nothing,
@@ -275,8 +292,7 @@ end
 """
     serve_website(; host="127.0.0.1", port=8080, gallery_prefix=nothing, base_url="", media_ext="mp4")
 
-Launch a live `Bonito.Server` serving the interactive `PlasmaWaves.jl` web application
-with full Julia-backed slider reactivity.
+Launch a live `Bonito.Server` serving the interactive `PlasmaWaves.jl` web application.
 """
 function PlasmaWaves.serve_website(;
     host::AbstractString = "127.0.0.1",

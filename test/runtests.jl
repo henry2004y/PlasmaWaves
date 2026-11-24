@@ -159,24 +159,27 @@ using PlasmaWaves
     end
 
     @testset "PlasmaBO.jl Numerical Dispersion Confirmation" begin
-        # 1. Ideal MHD Alfvén agrees at small k d_i, diverges at k d_i ~ 1 (Hall splitting)
-        comp_alf = confirm_alfven(
-            normalized_plasma(; mi_me = 100.0, β_i = 0.05, β_e = 0.05, vA_c = 0.05),
-            [0.05, 0.1, 0.8];
-            alg = BOHH(N = 3, J = 6),
-        )
+        # 1. Ideal MHD Alfvén agrees at small k d_i and tracks smooth EMIC (L) + Whistler (R) branches
+        comp_alf = confirm_alfven()
+        @test all(isfinite, comp_alf.ω_numerical)
         @test comp_alf.rel_error[1] < 0.05
         @test comp_alf.rel_error[end] > comp_alf.rel_error[1]
         @test validity_mask(comp_alf; tol = 0.05)[1]
+        @test issorted(real.(comp_alf.ω_numerical))
+        @test all(imag.(comp_alf.ω_numerical) .<= 1e-4)
+        @test length(comp_alf.extra_branches) == 1
+        wh_branch = comp_alf.extra_branches[1].ω
+        @test all(isfinite, wh_branch)
+        @test issorted(real.(wh_branch))
+        @test real(wh_branch[end]) > real(comp_alf.ω_numerical[end])
 
-        # 2. Cold Whistler agrees with PlasmaBO in the whistler band
+        # 2. Cold Whistler agrees with PlasmaBO across low- and mid-frequency whistler band
         comp_wh = confirm_whistler(
             normalized_plasma(; mi_me = 100.0, β_i = 0.02, β_e = 0.02, vA_c = 0.05),
-            [0.5, 1.5];
+            [0.2, 0.5, 1.0, 2.0, 3.5];
             alg = BOHH(N = 3, J = 6),
         )
-        @test comp_wh.rel_error[1] < 0.05
-        @test comp_wh.rel_error[2] < 0.05
+        @test maximum(comp_wh.rel_error) < 0.05
 
         # 3. Bohm-Gross Langmuir agrees at small kλ_D and PlasmaBO captures Landau damping
         comp_lang = confirm_langmuir(
