@@ -1,0 +1,6 @@
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+PlasmaWaves = "9a5e7fed-9cb1-4ecd-9dc1-6e6f31a3c91d"
+
+[sources]
+PlasmaWaves = {path = "C:\\Users\\hyzhou\\Documents\\GitHub\\PlasmaWaves"}

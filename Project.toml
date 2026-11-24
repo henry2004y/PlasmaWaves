@@ -1,0 +1,46 @@
+name = "PlasmaWaves"
+uuid = "9a5e7fed-9cb1-4ecd-9dc1-6e6f31a3c91d"
+authors = ["Hongyang Zhou <hyzhou@umich.edu>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PlasmaBO = "89aa2b4b-ed13-41a6-8160-6e24b4388da4"
+PlasmaDispersionBase = "d133dfe1-3f12-4270-b956-f7134e633753"
+PlasmaPopulations = "19fe0aba-210f-40e6-8711-72208e0968be"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[weakdeps]
+Bonito = "824d6782-a2ef-11e9-3a09-e5662e0c26f8"
+Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
+
+[extensions]
+PlasmaWavesBonitoExt = ["Bonito", "WGLMakie"]
+PlasmaWavesMakieExt = "Makie"
+PlasmaWavesSymbolicsExt = ["Symbolics", "Latexify"]
+
+[compat]
+Bonito = "4"
+Latexify = "0.16"
+Makie = "0.21, 0.22, 0.23, 0.24"
+PlasmaBO = "0.3"
+PlasmaDispersionBase = "0.1"
+PlasmaPopulations = "0.2"
+SpecialFunctions = "2"
+StaticArrays = "1"
+Symbolics = "6, 7"
+WGLMakie = "0.10, 0.11, 0.12, 0.13"
+julia = "1.10"
+
+[extras]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "CairoMakie", "Symbolics", "Latexify"]

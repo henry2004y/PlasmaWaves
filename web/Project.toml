@@ -1,0 +1,7 @@
+[deps]
+Bonito = "824d6782-a2ef-11e9-3a09-e5662e0c26f8"
+PlasmaWaves = "9a5e7fed-9cb1-4ecd-9dc1-6e6f31a3c91d"
+WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
+
+[sources]
+PlasmaWaves = {path = "C:\\Users\\hyzhou\\Documents\\GitHub\\PlasmaWaves"}
