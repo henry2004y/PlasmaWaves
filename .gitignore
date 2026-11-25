@@ -2,6 +2,10 @@ Manifest.toml
 examples/Manifest.toml
 web/Manifest.toml
 test/Manifest.toml
+docs/Manifest.toml
+docs/build/
+docs/bonito/
+docs/src/assets/gallery/
 gallery/
 site/
 *.gif

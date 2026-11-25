@@ -1,4 +1,4 @@
-name: Deploy Bonito Website to GitHub Pages
+name: Deploy Documentation Website to GitHub Pages
 
 on:
   push:
@@ -29,23 +29,15 @@ jobs:
       - name: Cache Julia packages
         uses: julia-actions/cache@v2
 
-      - name: Render wave animations (MP4) and diagnostic figures
+      - name: Build Documenter + Bonito site (with MP4 animations & interactive WGLMakie)
         run: |
-          julia --project=examples -e 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
-          julia --project=examples examples/generate_gallery.jl gallery mp4
-
-      - name: Build static Bonito + WGLMakie website
-        env:
-          BASE_URL: /${{ github.event.repository.name }}
-          MEDIA_EXT: mp4
-        run: |
-          julia --project=web -e 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
-          julia --project=web web/build_site.jl site
+          julia --project=docs -e 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
+          julia --project=docs docs/make.jl
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: docs/build
 
   deploy:
     environment:

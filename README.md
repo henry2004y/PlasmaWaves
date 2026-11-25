@@ -69,12 +69,14 @@ To render the entire gallery of figures and GIFs:
 julia --project=examples examples/generate_gallery.jl gallery
 ```
 
-### 4. Interactive Website (`Bonito.jl` + `WGLMakie`)
+### 4. Website (`Documenter.jl` + `Bonito.jl` + `WGLMakie`)
+
+The documentation and interactive wave website is built with `Documenter.jl` and `Bonito.DocumenterBonito`:
 
 ```bash
-# Live interactive server
-julia --project=web web/serve.jl
+# Build static Documenter + Bonito site into docs/build/
+julia --project=docs docs/make.jl
 
-# Export static multi-page HTML site (including Theory vs. PlasmaBO confirmation page)
-julia --project=web web/build_site.jl site
+# Or launch a live local Bonito server with real-time Julia callbacks
+julia --project=web web/serve.jl
 ```

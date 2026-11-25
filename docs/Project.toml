@@ -1,0 +1,11 @@
+[deps]
+Bonito = "824d6782-a2ef-11e9-3a09-e5662e0c26f8"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+PlasmaWaves = "9a5e7fed-9cb1-4ecd-9dc1-6e6f31a3c91d"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
+
+[sources]
+PlasmaWaves = {path = "C:\\Users\\hyzhou\\Documents\\GitHub\\PlasmaWaves"}
