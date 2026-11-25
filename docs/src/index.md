@@ -1,6 +1,6 @@
 # PlasmaWaves.jl
 
-**PlasmaWaves.jl** combines **analytical plasma wave theory**, **symbolic mathematical derivations** (`Symbolics.jl` + `Latexify.jl`), **kinetic numerical dispersion confirmation** (`PlasmaBO.jl` + `PlasmaDispersionBase.jl` + `PlasmaPopulations.jl`), and **interactive 2D/3D visualizations** (`Makie.jl` + `Bonito.jl`).
+**PlasmaWaves.jl** combines **analytical plasma wave theory**, **symbolic mathematical derivations** (`Symbolics.jl` + `Latexify.jl`), **kinetic numerical dispersion confirmation** (`PlasmaBO.jl` + `PlasmaDispersionBase.jl` + `PlasmaPopulations.jl`), and **Makie.jl** figures, **MP4** wave animations, and local **Bonito.jl** interactive apps.
 
 !!! tip "Companion Lecture Notes"
     For full step-by-step physical derivations, historical context, and observational discussions, see the companion [KeyNotes Plasma Physics Chapters](https://henry2004y.github.io/KeyNotes/). This site serves as the interactive computational & visual laboratory.

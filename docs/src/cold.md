@@ -21,14 +21,6 @@ CairoMakie.activate!()
 plot_cma_diagram()
 ```
 
-## Interactive 3D Whistler vs. EMIC Polarization (Drag to Rotate)
-
-```@example cold_3d
-using WGLMakie, PlasmaWaves
-WGLMakie.activate!()
-animate_whistler_emic(nothing).fig
-```
-
 ## Wave Propagation Animations
 
 ### Whistler vs. EMIC Helical Polarization

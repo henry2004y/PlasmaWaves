@@ -21,56 +21,16 @@ CairoMakie.activate!()
 plot_transport_ratios()
 ```
 
-## Interactive Friedrich Explorer (Offline Static Slider)
+## Friedrich Diagram Regime Sweep
 
-Drag the $v_s / v_A$ slider below to transition between low-$\beta$ ($v_s < v_A$) and high-$\beta$ ($v_s > v_A$) regimes—this widget is pre-recorded with `Bonito.record_states` so it works completely offline on GitHub Pages!
+The animation below sweeps $v_s / v_A$ smoothly between the low-$\beta$ ($v_s < v_A$) and high-$\beta$ ($v_s > v_A$) regimes, illustrating how the fast and slow magnetosonic phase-speed surfaces deform relative to the shear Alfvén cusp:
 
-```@example mhd_slider
-using Bonito, WGLMakie, PlasmaWaves
-WGLMakie.activate!()
-
-App() do session
-    s_vs = Slider(0.2:0.15:2.0; value = 0.65)
-    θs = range(0, 2π, length = 181)
-    set2 = WGLMakie.to_colormap(:Set2_8)
-
-    fig = Figure(size = (640, 480), fontsize = 18)
-    ax = Axis(
-        fig[1, 1];
-        title = L"\text{MHD Friedrich Phase-Velocity Diagram}",
-        titlesize = 19,
-        xlabel = L"v_x / v_A",
-        ylabel = L"v_z / v_A",
-        aspect = DataAspect(),
-        limits = (-2.2, 2.2, -2.2, 2.2),
-    )
-    vf_x = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_fast * sin(θ) for θ in θs])
-    vf_z = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_fast * cos(θ) for θ in θs])
-    va_x = [friedrich_phase_speeds(1.0, 0.65, θ).v_alfven * sin(θ) for θ in θs]
-    va_z = [friedrich_phase_speeds(1.0, 0.65, θ).v_alfven * cos(θ) for θ in θs]
-    vs_x = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_slow * sin(θ) for θ in θs])
-    vs_z = @lift([friedrich_phase_speeds(1.0, $s_vs, θ).v_slow * cos(θ) for θ in θs])
-
-    lines!(ax, vf_x, vf_z; color = set2[2], linewidth = 3.0, label = L"\text{Fast}")
-    lines!(ax, va_x, va_z; color = set2[3], linewidth = 3.0, linestyle = :dash, label = L"\text{Alfvén}")
-    lines!(ax, vs_x, vs_z; color = set2[1], linewidth = 3.0, label = L"\text{Slow}")
-    axislegend(ax; position = :rb, framevisible = false, labelsize = 15)
-
-    dom = DOM.div(
-        DOM.p("vₛ / vₐ = ", s_vs),
-        fig,
-    )
-    return Bonito.record_states(session, dom)
-end
+```@raw html
+<video src="assets/gallery/friedrich_sweep.mp4" autoplay loop muted playsinline controls style="max-width:100%; border-radius:8px;"></video>
 ```
 
-## Interactive 3D Shear Alfvén Wave (Drag to Rotate)
-
-```@example mhd_3d
-using WGLMakie, PlasmaWaves
-WGLMakie.activate!()
-animate_alfven_wave(nothing).fig
-```
+!!! tip "Local Interactive Server"
+    For live sliders and rotatable 3D `WGLMakie` scenes locally in your browser, run `julia --project=web web/serve.jl`.
 
 ## Wave Propagation Animations
 
